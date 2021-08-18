@@ -1,0 +1,95 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH HEALTH-CHECK 8 "May 24, 2017"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+health-check \- a tool to measure system events.
+.br
+
+.SH SYNOPSIS
+.B health-check
+.RI [options]
+.br
+
+.SH DESCRIPTION
+Health-check monitors a process and optionally their child
+processes and threads for a given amount of time.  At the end
+of the monitoring it will display the CPU time used, wakeup
+events generated and I/O operations of the given processes.
+It can be used to diagnose unhealthy badly behaving processes.
+.SH OPTIONS
+health-check options are as follow:
+.TP
+.B \-h
+Show help
+.TP
+.B \-b
+Brief (terse) output for quick overview.
+.TP
+.B \-c 
+Find and monitor all child and threads of a given set of processes. This
+option is only useful when attaching to already running processes using
+the \-p option.
+.TP
+.B \-d 
+Specify analysis duration in seconds. Default is 60 seconds.  A duration
+of 0 will make health-check run forever, or until the monitored process
+exits.
+.TP
+.B \-f
+Follow fork, vfork and clone system calls.
+.TP
+.B \-p pid[,pid]
+Specify which processes to analyse. Can be process ID or process name.
+.TP
+.B \-r
+Resolve IP addresses, this can take some time, hence it is an opt-in
+feature.
+.TP
+.B \-m max
+Specify maximum number of timeout blocking system calls are logged
+before completing. This is useful with very busy processes that can
+generate tens of thousands of ptrace events that have to be logged by
+health-check. The default is 1 million.
+.TP
+.B \-o logfile
+Specify output log file to export JSON formatted results.  The resulting
+data can be then easily imported and analysed using JSON parsing tools.
+.TP
+.B \-u username
+Run command as the specified user.  This cannot be used with the \-p option.
+.TP
+.B \-v verbose
+Enable verbose mode (currently just for \-W wakelock option). Not compatible
+with the \-b brief option.
+.TP
+.B \-w
+This uses fnotify to count the number of wakelock lock/unlocks. Lightweight
+and simple wakelock monitoring.
+.TP
+.B \-W
+This does deeper system call inspection to monitor wakelock usage and uses
+up more run time processing to perform the inspection.
+.SH AUTHOR
+health-check was written by Colin King <colin.king@canonical.com>
+.PP
+This manual page was written by Colin King <colin.king@canonical.com>,
+for the Ubuntu project (but may be used by others).
+.SH COPYRIGHT
+Copyright \(co 2014-2018 Canonical Ltd.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
