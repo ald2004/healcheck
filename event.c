@@ -32,7 +32,7 @@
 #include "health-check.h"
 
 static list_t event_info_start, event_info_finish;
-static bool timer_stats = true;
+static bool timer_stats = false;
 
 /*
  *  event_timer_stat_set()
@@ -149,7 +149,7 @@ int event_get_all_pids(const list_t *pids, proc_state state)
 	list_t *events = (state == PROC_START) ? &event_info_start : &event_info_finish;
 
 	if ((fp = fopen(TIMER_STATS, "r")) == NULL) {
-		fprintf(stderr, "Cannot open %s.\n", TIMER_STATS);
+		//fprintf(stderr, "Cannot open %s.\n", TIMER_STATS);
 		return 0;
 	}
 

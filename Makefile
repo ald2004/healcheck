@@ -100,6 +100,7 @@ clean:
 
 install: health-check health-check.8.gz
 	mkdir -p ${DESTDIR}${BINDIR}
+	rm -f /usr/bin/health-check 
 	cp health-check ${DESTDIR}${BINDIR}
 	cp install/lib/libjson* /usr/lib/ 
 	mkdir -p ${DESTDIR}${MANDIR}
