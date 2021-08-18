@@ -5,6 +5,7 @@ pip3 install psutil
 
 2.cd $PWD && make -j -s && make install
 
-2.1 invoke healthcheck.update_ruleid_processid(ruleid,processid) within every camera+alg+processid
+###### 2.1 invoke healthcheck.update_ruleid_processid(ruleid,processid) within every camera+alg+processid
 
-3. python script/healthcheck.py dothework
+
+3.python script/healthcheck.py dothework
