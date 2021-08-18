@@ -28,7 +28,7 @@ import sys, os, json, psutil
 # import from local directory libleveldb.so
 import leveldb
 import fire
-import multiprocessing
+import threading
 import time
 import requests
 import json
@@ -78,9 +78,15 @@ mydns = dns
 
 
 def update_ruleid_processid(ruleid: int, processid: int):
-    db = leveldb.DB(f"/dev/shm/{LEVELDB_NAME}".encode('utf-8'))
-    db.put(f"rule_id_{ruleid:05d}".encode('utf-8'), f"{processid}".encode('utf-8'))
-    db.close()
+    try:
+        db = leveldb.DB(f"/dev/shm/{LEVELDB_NAME}".encode('utf-8'))
+        db.put(f"rule_id_{ruleid:05d}".encode('utf-8'), f"{processid}".encode('utf-8'))
+        db.close()
+    except:
+        _init_leveldb()
+        db = leveldb.DB(f"/dev/shm/{LEVELDB_NAME}".encode('utf-8'))
+        db.put(f"rule_id_{ruleid:05d}".encode('utf-8'), f"{processid}".encode('utf-8'))
+        db.close()
 
 
 def _init_leveldb():
@@ -95,6 +101,7 @@ def _init_leveldb():
 
     # for key, value in db:
     #     print(f"the key is :{key.decode('utf-8')} ----->  value is : {value.decode('utf-8')}")
+    db.close()
 
 
 def read_threshold_fromdb(init_leveldb=False):
@@ -243,8 +250,9 @@ def monitor_process(ruleid: int, pid: int):
                 return
     except:
         sys.stderr.write("An execption occurred, failed to test on PID " + str(pid) + "\n")
-        print(f"p.name is {p.name()}")
+        print(f"\tp.name is {p.name()}")
         raise
+        # return
 
 
 def show_leveldb():
@@ -254,7 +262,7 @@ def show_leveldb():
     db.close()
 
 
-def dothework(init_leveldb=False):
+def dothework(init_leveldb=False, use_thread=False):
     thres = read_threshold_fromdb(init_leveldb)
     # print(f"thres is : {thres}")
     # for i in range(99):
@@ -276,10 +284,12 @@ def dothework(init_leveldb=False):
     for k, v in ruleid_processid.items():
         try:
             ruleid = k.split('_')[-1]
-            p = multiprocessing.Process(target=monitor_process, args=(int(ruleid), int(v)))
-            # monitor_process(int(ruleid), int(v))
-            p.start()
-            mppool.append(p)
+            if use_thread:
+                p = threading.Thread(target=monitor_process, args=(int(ruleid), int(v)))
+                p.start()
+                mppool.append(p)
+            else:
+                monitor_process(int(ruleid), int(v))
         except:
             print(f"rule id:{k},deal error.")
     for p in mppool:
