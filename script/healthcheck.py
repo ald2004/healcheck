@@ -51,7 +51,7 @@ default_duration = 6
 #       health-check.cpu-load.cpu-load-total.user-cpu-percent   0.5
 #       health-check.cpu-load.cpu-load-total.system-cpu-percent 0.5
 #
-LEVELDB_NAME = "leveldb"
+LEVELDB_NAME = "txc_leveldb"
 
 
 class bcolors:
@@ -263,40 +263,49 @@ def show_leveldb():
 
 
 def dothework(init_leveldb=False, use_thread=False):
-    thres = read_threshold_fromdb(init_leveldb)
     # print(f"thres is : {thres}")
     # for i in range(99):
     update_ruleid_processid(886, 886)
     update_ruleid_processid(1057, 1057)
     # show_leveldb()
-    ruleid_processid = {}
-    db = leveldb.DB(f"/dev/shm/{LEVELDB_NAME}".encode('utf-8'), create_if_missing=True)
-    for key, value in db.range(start_key=b'rule_id_00000', end_key=b'rule_id_99999', start_inclusive=False,
-                               end_inclusive=False):
-        ruleid_processid[key.decode('utf-8')] = int(value.decode('utf-8'))
-        # monitor_process(int(value.decode('utf-8')))
-        # print(int(value.decode('utf-8')))
-        # monitor_process
-    db.close()
-    print(ruleid_processid)
 
-    mppool = []
-    for k, v in ruleid_processid.items():
+    while 1:
         try:
-            ruleid = k.split('_')[-1]
-            if use_thread:
-                p = threading.Thread(target=monitor_process, args=(int(ruleid), int(v)))
-                p.start()
-                mppool.append(p)
-            else:
-                monitor_process(int(ruleid), int(v))
+            thres = read_threshold_fromdb(init_leveldb)
+            ruleid_processid = {}
+            db = leveldb.DB(f"/dev/shm/{LEVELDB_NAME}".encode('utf-8'), create_if_missing=True)
+            for key, value in db.range(start_key=b'rule_id_00000', end_key=b'rule_id_99999', start_inclusive=False,
+                                       end_inclusive=False):
+                ruleid_processid[key.decode('utf-8')] = int(value.decode('utf-8'))
+                # monitor_process(int(value.decode('utf-8')))
+                # print(int(value.decode('utf-8')))
+                # monitor_process
+            db.close()
+            print(ruleid_processid)
+
+            mppool = []
+            for k, v in ruleid_processid.items():
+                try:
+                    ruleid = k.split('_')[-1]
+                    if use_thread:
+                        p = threading.Thread(target=monitor_process, args=(int(ruleid), int(v)))
+                        p.start()
+                        mppool.append(p)
+                    else:
+                        monitor_process(int(ruleid), int(v))
+                except:
+                    print(f"rule id:{k},deal error.")
+            for p in mppool:
+                try:
+                    p.join()
+                except:
+                    pass
         except:
-            print(f"rule id:{k},deal error.")
-    for p in mppool:
-        try:
-            p.join()
-        except:
-            pass
+            try:
+                db.close()
+            except:
+                pass
+        time.sleep(3)
 
 
 if __name__ == '__main__':
