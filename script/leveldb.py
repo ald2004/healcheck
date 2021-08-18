@@ -844,8 +844,8 @@ def DB(path, bloom_filter_size=10, create_if_missing=False,
     _ldb.leveldb_options_set_block_size(options, block_size)
 
     error = ctypes.POINTER(ctypes.c_char)()
-    #db = _ldb.leveldb_open(options, path, ctypes.byref(error))
-    db = _ldb.leveldb_open(options, path, error)
+    db = _ldb.leveldb_open(options, path, ctypes.byref(error))
+    #db = _ldb.leveldb_open(options, path, error)
     _ldb.leveldb_options_destroy(options)
     _checkError(error)
 
