@@ -184,7 +184,7 @@ def health_check(pid, procname, thresholds):
     return check_thresholds(procname, data, thresholds)
 
 
-def send_api_url(ruleid: int):
+def send_api_url(ruleid: int, isError: int = 1):
     print(f"{mycolor.OKCYAN}send ruleid:{ruleid} offline message ...{mycolor.ENDC}")
     # PARAMS = {
     #     "id": f"{ruleid}"
@@ -195,7 +195,7 @@ def send_api_url(ruleid: int):
         "Content-Type": "application/x-www-form-urlencoded"
     }
     # r = requests.put(url=f"http://{mydns.SITE_B}/api/rule/error/{ruleid}", headers=HEADER)
-    r = requests.put(url=f"{mydns.SITE_B}/api/rule/error/{ruleid}", headers=HEADER)
+    r = requests.put(url=f"{mydns.SITE_B}/api/rule/error/{ruleid}?isError={isError}", headers=HEADER)
     try:
         xx = json.loads(r.text)
         # {"success":true,"code":0,"message":"业务处理成功","data":false}
@@ -241,8 +241,8 @@ def monitor_process(ruleid: int, pid: int):
             thres = read_threshold_fromdb()
             # print('333333333333333333333333', flush=True)
             if (health_check(pid, procname, thres)):
-                print(f"health_check return true")
-
+                print(f"[health_check]: alg rule {ruleid}, is online!! now send api. ")
+                send_api_url(ruleid,0)
                 return
             else:
                 print(f"[health_check]: alg rule {ruleid}, is offline!! now send api. ")
